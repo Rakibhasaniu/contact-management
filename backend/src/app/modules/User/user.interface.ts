@@ -23,6 +23,6 @@ export interface UserModel extends Model<IUser, {}, IUserMethods> {
   isPasswordMatched(plainTextPassword: string, hashedPassword: string): Promise<boolean>;
   isJWTIssuedBeforePasswordChanged(
     passwordChangedTimestamp: Date,
-    jwtIssuedTimestamp: number,
+    jwtIssuedTimestamp: number
   ): boolean;
 }

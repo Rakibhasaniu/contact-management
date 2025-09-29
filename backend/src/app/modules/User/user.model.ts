@@ -46,12 +46,11 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   }
 );
 
-// Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
-  
+
   this.password = await bcrypt.hash(
     this.password,
     Number(config.bcrypt_salt_rounds)
@@ -59,7 +58,6 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Remove password from JSON response
 userSchema.set('toJSON', {
   transform: function (doc, ret) {
     delete ret.password;
@@ -67,7 +65,6 @@ userSchema.set('toJSON', {
   },
 });
 
-// Static methods
 userSchema.statics.isUserExistsByEmail = async function (email: string) {
   return await this.findOne({ email, isDeleted: { $ne: true } }).select('+password');
 };
@@ -87,7 +84,6 @@ userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
   return passwordChangedTime > jwtIssuedTimestamp;
 };
 
-// Indexes
 userSchema.index({ email: 1 });
 userSchema.index({ isDeleted: 1, status: 1 });
 
