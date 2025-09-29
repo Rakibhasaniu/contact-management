@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import config from '../../config';
 import AppError from '../../errors/AppError';
+import { Profile } from '../Profile/profile.model';
 import { User } from '../User/user.model';
 import { TLoginUser, TRegisterUser } from './auth.interface';
 import { createToken } from './auth.utils';
@@ -22,6 +21,7 @@ const registerUser = async (payload: TRegisterUser) => {
   try {
     session.startTransaction();
 
+    // Step 1: Create User
     const [newUser] = await User.create(
       [
         {
@@ -31,6 +31,27 @@ const registerUser = async (payload: TRegisterUser) => {
           isDeleted: false,
         },
       ],
+      { session }
+    );
+
+    // Step 2: Create Profile
+    const [newProfile] = await Profile.create(
+      [
+        {
+          userId: newUser._id,
+          firstName,
+          lastName,
+          otherEmails: otherEmails || [],
+          contacts: [], // We'll handle contacts later with Contact module
+        },
+      ],
+      { session }
+    );
+
+    // Step 3: Link profile to user
+    await User.findByIdAndUpdate(
+      newUser._id,
+      { profileId: newProfile._id },
       { session }
     );
 
@@ -59,6 +80,10 @@ const registerUser = async (payload: TRegisterUser) => {
       user: {
         id: newUser._id,
         email: newUser.email,
+        profile: {
+          firstName: newProfile.firstName,
+          lastName: newProfile.lastName,
+        },
       },
     };
   } catch (error) {
@@ -90,6 +115,9 @@ const loginUser = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.FORBIDDEN, 'Password does not match');
   }
 
+  // Get profile info
+  const profile = await Profile.findOne({ userId: user._id });
+
   const jwtPayload = {
     userId: user._id.toString(),
     role: 'user',
@@ -114,6 +142,12 @@ const loginUser = async (payload: TLoginUser) => {
     user: {
       id: user._id,
       email: user.email,
+      profile: profile
+        ? {
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+          }
+        : null,
     },
   };
 };

@@ -11,7 +11,7 @@ export interface IProfile {
   firstName: string;
   lastName: string;
   otherEmails?: string[];
-  contacts?: IProfileContact[]; // Only used during registration
+  contacts?: IProfileContact[];
   createdAt: Date;
   updatedAt: Date;
 }
