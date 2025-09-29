@@ -1,46 +1,46 @@
-// modules/Auth/auth.route.ts
 import express from 'express';
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
-import { USER_ROLE } from '../User/user.constant';
 import { AuthControllers } from './auth.controller';
 import { AuthValidation } from './auth.validation';
 
 const router = express.Router();
 
 router.post(
+  '/register',
+  validateRequest(AuthValidation.registerSchema),
+  AuthControllers.register
+);
+
+router.post(
   '/login',
-  validateRequest(AuthValidation.loginValidationSchema),
-  AuthControllers.loginUser,
+  validateRequest(AuthValidation.loginSchema),
+  AuthControllers.loginUser
 );
 
 router.post(
   '/change-password',
-  auth(
-    USER_ROLE.superAdmin,
-    USER_ROLE.admin,
-    USER_ROLE.employee, 
-  ),
+  auth(),
   validateRequest(AuthValidation.changePasswordValidationSchema),
-  AuthControllers.changePassword,
+  AuthControllers.changePassword
 );
 
 router.post(
   '/refresh-token',
   validateRequest(AuthValidation.refreshTokenValidationSchema),
-  AuthControllers.refreshToken,
+  AuthControllers.refreshToken
 );
 
 router.post(
   '/forget-password',
   validateRequest(AuthValidation.forgetPasswordValidationSchema),
-  AuthControllers.forgetPassword,
+  AuthControllers.forgetPassword
 );
 
 router.post(
   '/reset-password',
-  validateRequest(AuthValidation.resetPasswordValidationSchema), 
-  AuthControllers.resetPassword,
+  validateRequest(AuthValidation.resetPasswordValidationSchema),
+  AuthControllers.resetPassword
 );
 
 export const AuthRoutes = router;

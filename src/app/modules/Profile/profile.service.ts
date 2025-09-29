@@ -1,69 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { TProfile } from './profile.interface';
+import AppError from '../../errors/AppError';
+import { IProfile } from './profile.interface';
 import { Profile } from './profile.model';
-import { normalizePhoneNumber } from '../../utils/phoneNormalizer';
 
+const getProfileByUserId = async (userId: string) => {
+  const profile = await Profile.findOne({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  });
 
-const createProfile = async (payload: TProfile) => {
-  const session = await mongoose.startSession();
-  
-  try {
-    session.startTransaction();
-
-    // Create profile
-    const profile = await Profile.create([payload], { session });
-
-    // Process initial contacts
-    if (payload.initialContacts && payload.initialContacts.length > 0) {
-      for (const contact of payload.initialContacts) {
-        const normalizedPhone = normalizePhoneNumber(contact.phoneNumber);
-        
-        // Find or create global contact
-        let globalContact = await contact.findOne({ 
-          normalizedPhone 
-        }).session(session);
-        
-        if (!globalContact) {
-          globalContact = await Contact.create([{
-            phoneNumber: contact.phoneNumber,
-            normalizedPhone,
-          }], { session });
-        }
-
-        // Create user alias
-        await Alias.create([{
-          userId: payload.userId,
-          contactId: globalContact[0]._id,
-          alias: contact.alias,
-        }], { session });
-      }
-    }
-
-    await session.commitTransaction();
-    await session.endSession();
-
-    return profile[0];
-  } catch (error) {
-    await session.abortTransaction();
-    await session.endSession();
-    throw error;
+  if (!profile) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Profile not found');
   }
+
+  return profile;
 };
 
-const getProfile = async (userId: string) => {
-  return await Profile.findOne({ userId }).populate('userId');
-};
+const updateProfile = async (
+  userId: string,
+  payload: Partial<IProfile>
+) => {
+  // Don't allow updating userId or contacts through this endpoint
+  const { userId: _userId, contacts, ...updateData } = payload as any;
 
-const updateProfile = async (userId: string, payload: Partial<TProfile>) => {
-  return await Profile.findOneAndUpdate(
-    { userId },
-    payload,
+  const profile = await Profile.findOneAndUpdate(
+    { userId: new mongoose.Types.ObjectId(userId) },
+    updateData,
     { new: true, runValidators: true }
   );
+
+  if (!profile) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Profile not found');
+  }
+
+  return profile;
 };
 
 export const ProfileServices = {
-  createProfile,
-  getProfile,
+  getProfileByUserId,
   updateProfile,
 };

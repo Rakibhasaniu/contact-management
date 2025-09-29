@@ -1,32 +1,28 @@
 import { Schema, model } from 'mongoose';
-import { TContact } from './contact.interface';
+import { IContact } from './contact.interface';
 
-const contactSchema = new Schema<TContact>(
+const contactSchema = new Schema<IContact>(
   {
     phoneNumber: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, 'Phone number is required'],
       trim: true,
     },
     normalizedPhone: {
       type: String,
-      required: true,
+      required: [true, 'Normalized phone is required'],
       unique: true,
       trim: true,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
     },
   },
   {
     timestamps: true,
-  },
+    versionKey: false,
+  }
 );
 
-// Index for faster search
-contactSchema.index({ normalizedPhone: 1 });
+// Indexes
+contactSchema.index({ normalizedPhone: 1 }, { unique: true });
 contactSchema.index({ phoneNumber: 1 });
 
-export const Contact = model<TContact>('Contact', contactSchema);
+export const Contact = model<IContact>('Contact', contactSchema);

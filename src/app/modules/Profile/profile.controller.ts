@@ -1,22 +1,11 @@
 import httpStatus from 'http-status';
-import { ProfileServices } from './profile.service';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
+import { ProfileServices } from './profile.service';
 
-const createProfile = catchAsync(async (req, res) => {
-  const result = await ProfileServices.createProfile(req.body);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Profile created successfully',
-    data: result,
-  });
-});
-
-const getProfile = catchAsync(async (req, res) => {
+const getMyProfile = catchAsync(async (req, res) => {
   const { userId } = req.user;
-  const result = await ProfileServices.getProfile(userId);
+  const result = await ProfileServices.getProfileByUserId(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -26,7 +15,7 @@ const getProfile = catchAsync(async (req, res) => {
   });
 });
 
-const updateProfile = catchAsync(async (req, res) => {
+const updateMyProfile = catchAsync(async (req, res) => {
   const { userId } = req.user;
   const result = await ProfileServices.updateProfile(userId, req.body);
 
@@ -39,7 +28,6 @@ const updateProfile = catchAsync(async (req, res) => {
 });
 
 export const ProfileControllers = {
-  createProfile,
-  getProfile,
-  updateProfile,
+  getMyProfile,
+  updateMyProfile,
 };

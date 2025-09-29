@@ -1,29 +1,18 @@
-import express from 'express';
-import validateRequest from '../../middlewares/validateRequest';
-import { ProfileValidation } from './profile.validation';
-import { ProfileControllers } from './profile.controller';
+import { Router } from 'express';
 import auth from '../../middlewares/auth';
+import validateRequest from '../../middlewares/validateRequest';
+import { ProfileControllers } from './profile.controller';
+import { ProfileValidation } from './profile.validation';
 
+const router = Router();
 
-const router = express.Router();
+router.get('/me', auth(), ProfileControllers.getMyProfile);
 
-router.post(
-  '/',
-  validateRequest(ProfileValidation.createProfileValidationSchema),
-  ProfileControllers.createProfile
-);
-
-router.get(
+router.patch(
   '/me',
-  auth('superAdmin', 'admin', 'employee'),
-  ProfileControllers.getProfile
-);
-
-router.put(
-  '/me',
-  auth('superAdmin', 'admin', 'employee'),
-  validateRequest(ProfileValidation.updateProfileValidationSchema),
-  ProfileControllers.updateProfile
+  auth(),
+  validateRequest(ProfileValidation.updateProfileSchema),
+  ProfileControllers.updateMyProfile
 );
 
 export const ProfileRoutes = router;

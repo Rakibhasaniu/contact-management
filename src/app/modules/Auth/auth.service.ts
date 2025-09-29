@@ -103,6 +103,147 @@ const loginUser = async (payload: TLoginUser) => {
     }
   };
 };
+interface IRegisterUser {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  otherEmails?: string[];
+  contacts?: Array<{ phoneNumber: string; alias: string }>;
+}
+
+// Add this function to AuthServices
+const registerUser = async (payload: IRegisterUser) => {
+  const { email, password, firstName, lastName, otherEmails, contacts } = payload;
+
+  // Check if user already exists
+  const existingUser = await User.isUserExistsByEmail(email);
+  if (existingUser) {
+    throw new AppError(httpStatus.CONFLICT, 'User with this email already exists');
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    // Step 1: Create User
+    const [newUser] = await User.create(
+      [
+        {
+          email,
+          password, // Will be hashed by pre-save hook
+          status: 'active',
+          isDeleted: false,
+        },
+      ],
+      { session }
+    );
+
+    // Step 2: Create Profile
+    const [newProfile] = await Profile.create(
+      [
+        {
+          userId: newUser._id,
+          firstName,
+          lastName,
+          otherEmails: otherEmails || [],
+          contacts: contacts || [],
+        },
+      ],
+      { session }
+    );
+
+    // Step 3: Link profile to user
+    await User.findByIdAndUpdate(
+      newUser._id,
+      { profileId: newProfile._id },
+      { session }
+    );
+
+    // Step 4: Process initial contacts if provided
+    if (contacts && contacts.length > 0) {
+      for (const contactData of contacts) {
+        const { phoneNumber, alias } = contactData;
+
+        // Validate phone number
+        if (!isValidPhoneNumber(phoneNumber)) {
+          console.warn(`Invalid phone number skipped: ${phoneNumber}`);
+          continue;
+        }
+
+        const normalizedPhone = normalizePhoneNumber(phoneNumber);
+
+        // Upsert global contact
+        let globalContact = await Contact.findOne({ normalizedPhone }).session(session);
+
+        if (!globalContact) {
+          [globalContact] = await Contact.create(
+            [
+              {
+                phoneNumber,
+                normalizedPhone,
+              },
+            ],
+            { session }
+          );
+        }
+
+        // Create user-contact link
+        await UserContact.create(
+          [
+            {
+              userId: newUser._id,
+              contactId: globalContact._id,
+              alias,
+              labels: [],
+              notes: '',
+            },
+          ],
+          { session }
+        );
+      }
+    }
+
+    await session.commitTransaction();
+
+    // Generate tokens
+    const jwtPayload = {
+      userId: newUser._id.toString(),
+      role: 'user',
+    };
+
+    const accessToken = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      config.jwt_access_expires_in as string
+    );
+
+    const refreshToken = createToken(
+      jwtPayload,
+      config.jwt_refresh_secret as string,
+      config.jwt_refresh_expires_in as string
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        profile: {
+          firstName: newProfile.firstName,
+          lastName: newProfile.lastName,
+        },
+      },
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
+};
 
 const changePassword = async (
   userData: JwtPayload,
@@ -625,4 +766,5 @@ export const AuthServices = {
   resetPassword,
   getUserLoginStats,
   getPasswordSecurityStats,
+  registerUser
 };

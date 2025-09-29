@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { TProfile } from './profile.interface';
+import { IProfile } from './profile.interface';
 
-const profileSchema = new Schema<TProfile>(
+const profileSchema = new Schema<IProfile>(
   {
     userId: {
       type: Schema.Types.ObjectId,
