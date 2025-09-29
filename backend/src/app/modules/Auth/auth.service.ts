@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
@@ -7,9 +9,12 @@ import { Profile } from '../Profile/profile.model';
 import { User } from '../User/user.model';
 import { TLoginUser, TRegisterUser } from './auth.interface';
 import { createToken } from './auth.utils';
+import { isValidPhoneNumber, normalizePhoneNumber } from '../Contact/contact.utils';
+import { Contact } from '../Contact/contact.model';
+import { UserContact } from '../UserContact/userContact.model';
 
 const registerUser = async (payload: TRegisterUser) => {
-  const { email, password, firstName, lastName, otherEmails } = payload;
+  const { email, password, firstName, lastName, otherEmails, contacts } = payload;
 
   const existingUser = await User.isUserExistsByEmail(email);
   if (existingUser) {
@@ -42,7 +47,7 @@ const registerUser = async (payload: TRegisterUser) => {
           firstName,
           lastName,
           otherEmails: otherEmails || [],
-          contacts: [], // We'll handle contacts later with Contact module
+          contacts: contacts || [], // Store initial contacts in profile
         },
       ],
       { session }
@@ -54,6 +59,59 @@ const registerUser = async (payload: TRegisterUser) => {
       { profileId: newProfile._id },
       { session }
     );
+
+    // Step 4: Process initial contacts if provided
+    if (contacts && contacts.length > 0) {
+      for (const contactData of contacts) {
+        const { phoneNumber, alias } = contactData;
+
+        // Validate phone number
+        if (!isValidPhoneNumber(phoneNumber)) {
+          console.warn(`Invalid phone number skipped during registration: ${phoneNumber}`);
+          continue; // Skip invalid numbers, don't fail the entire registration
+        }
+
+        const normalizedPhone = normalizePhoneNumber(phoneNumber);
+
+        // Upsert global contact
+        let globalContact = await Contact.findOne({ normalizedPhone }).session(session);
+
+        if (!globalContact) {
+          [globalContact] = await Contact.create(
+            [
+              {
+                phoneNumber,
+                normalizedPhone,
+              },
+            ],
+            { session }
+          );
+        }
+
+        // Create user-contact link (skip if duplicate)
+        try {
+          await UserContact.create(
+            [
+              {
+                userId: newUser._id,
+                contactId: globalContact._id,
+                alias,
+                labels: [],
+                notes: '',
+              },
+            ],
+            { session }
+          );
+        } catch (error: any) {
+          // If duplicate (same phone number twice in registration), skip
+          if (error.code === 11000) {
+            console.warn(`Duplicate contact skipped: ${phoneNumber}`);
+            continue;
+          }
+          throw error;
+        }
+      }
+    }
 
     await session.commitTransaction();
 
