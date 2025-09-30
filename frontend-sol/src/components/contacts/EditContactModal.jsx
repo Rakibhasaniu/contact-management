@@ -9,7 +9,6 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 import Alert from '../common/Alert';
 
-// Validation schema
 const schema = yup.object().shape({
   alias: yup.string().required('Name/Alias is required'),
   notes: yup.string(),
@@ -63,7 +62,9 @@ const EditContactModal = ({ isOpen, onClose, contact }) => {
   };
 
   const handleAddLabel = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // ← CRITICAL: Prevent form submission
+    e.stopPropagation(); // ← Stop event bubbling
+    
     if (labelInput.trim() && !labels.includes(labelInput.trim())) {
       setLabels([...labels, labelInput.trim()]);
       setLabelInput('');
@@ -80,20 +81,31 @@ const EditContactModal = ({ isOpen, onClose, contact }) => {
     onClose();
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // ← Prevent form submission on Enter
+      handleAddLabel(e);
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Edit Contact">
       {error && <Alert type="error" message={error} onClose={() => dispatch(clearError())} />}
       {success && <Alert type="success" message="Contact updated successfully!" />}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-        {/* Phone Number (Read-only) */}
-        <div>
+<form 
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleSubmit(onSubmit)(e);
+  }} 
+  className="space-y-4 mt-4"
+>        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Phone Number
           </label>
           <input
             type="text"
-            value={contact.phoneNumber}
+            value={contact.phoneNumber || contact.contact?.phoneNumber}
             disabled
             className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
           />
@@ -116,12 +128,12 @@ const EditContactModal = ({ isOpen, onClose, contact }) => {
               type="text"
               value={labelInput}
               onChange={(e) => setLabelInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddLabel(e)}
+              onKeyPress={handleKeyPress}
               placeholder="e.g., friend, family, work"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <button
-              type="button"
+              type="button" 
               onClick={handleAddLabel}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
             >
@@ -137,7 +149,7 @@ const EditContactModal = ({ isOpen, onClose, contact }) => {
                 >
                   {label}
                   <button
-                    type="button"
+                    type="button" 
                     onClick={() => handleRemoveLabel(label)}
                     className="hover:text-blue-900"
                   >
@@ -160,10 +172,20 @@ const EditContactModal = ({ isOpen, onClose, contact }) => {
         </div>
 
         <div className="flex gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={handleClose} className="flex-1">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleClose} 
+            className="flex-1"
+          >
             Cancel
           </Button>
-          <Button type="submit" variant="primary" loading={loading} className="flex-1">
+          <Button 
+            type="submit" 
+            variant="primary" 
+            loading={loading} 
+            className="flex-1"
+          >
             Update Contact
           </Button>
         </div>

@@ -9,18 +9,26 @@ import Button from '../common/Button';
 import Alert from '../common/Alert';
 import Spinner from '../common/Spinner';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import ConfirmDialog from '../common/confirmDialog';
 
 const ContactList = () => {
   const dispatch = useDispatch();
   const { contacts, loading, error, success, searchResults, isSearching } = useSelector(
     (state) => state.contacts
   );
-  console.log("🚀 ~ ContactList ~ contacts:", contacts)
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  
+  // Add confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    contactId: null,
+    contactName: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchContacts());
@@ -39,11 +47,32 @@ const ContactList = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (contactId) => {
-    if (window.confirm('Are you sure you want to delete this contact?')) {
-      await dispatch(deleteContact(contactId));
+  const handleDeleteClick = (contact) => {
+    // Open confirmation dialog instead of browser confirm
+    setConfirmDialog({
+      isOpen: true,
+      contactId: contact._id,
+      contactName: contact.alias,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteContact(confirmDialog.contactId)).unwrap();
       dispatch(fetchContacts());
+      
+      // Close dialog after successful deletion
+      setConfirmDialog({ isOpen: false, contactId: null, contactName: '' });
+    } catch (error) {
+      console.error('Delete failed:', error);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDialog({ isOpen: false, contactId: null, contactName: '' });
   };
 
   const handleSearchResults = (hasResults) => {
@@ -131,7 +160,7 @@ const ContactList = () => {
               key={contact._id}
               contact={contact}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDeleteClick(contact)} 
             />
           ))}
         </div>
@@ -153,6 +182,16 @@ const ContactList = () => {
           contact={selectedContact}
         />
       )}
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        loading={isDeleting}
+        title="Delete Contact"
+        message={`Are you sure you want to delete "${confirmDialog.contactName}"? This action cannot be undone.`}
+      />
     </div>
   );
 };

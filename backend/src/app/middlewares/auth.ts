@@ -10,17 +10,14 @@ const auth = () => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
-    // checking if the token is missing
     if (!authHeader) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    // Extract token from "Bearer TOKEN" format
     const token = authHeader.startsWith('Bearer ')
       ? authHeader.slice(7)
       : authHeader;
 
-    // checking if the given token is valid
     const decoded = jwt.verify(
       token,
       config.jwt_access_secret as string
@@ -28,24 +25,20 @@ const auth = () => {
 
     const { userId, iat } = decoded;
 
-    // checking if the user exists
     const user = await User.findById(userId).select('+password');
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
     }
 
-    // checking if the user is already deleted
     if (user.isDeleted) {
       throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted!');
     }
 
-    // checking if the user is blocked
     if (user.status === 'blocked') {
       throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
     }
 
-    // Check if password changed after token was issued
     if (
       user.passwordChangedAt &&
       User.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat as number)

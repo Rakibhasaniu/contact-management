@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
 

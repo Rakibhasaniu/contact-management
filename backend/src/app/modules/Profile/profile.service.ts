@@ -10,7 +10,7 @@ import { Profile } from './profile.model';
 const getProfileByUserId = async (userId: string) => {
   const profile = await Profile.findOne({ 
     userId: new mongoose.Types.ObjectId(userId) 
-  });
+  }).populate('userId', 'email');;
 
   if (!profile) {
     throw new AppError(httpStatus.NOT_FOUND, 'Profile not found');
@@ -23,7 +23,6 @@ const updateProfile = async (
   userId: string,
   payload: Partial<IProfile>
 ) => {
-  // Don't allow updating userId or contacts through this endpoint
   const { userId: _userId, contacts, ...updateData } = payload as any;
 
   const profile = await Profile.findOneAndUpdate(

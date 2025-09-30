@@ -9,7 +9,6 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 import Alert from '../common/Alert';
 
-// Validation schema
 const schema = yup.object().shape({
   phoneNumber: yup
     .string()
@@ -97,7 +96,6 @@ const AddContactModal = ({ isOpen, onClose }) => {
           required
         />
 
-        {/* Labels */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Labels (Optional)

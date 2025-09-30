@@ -47,7 +47,6 @@ const profileSchema = new Schema<IProfile>(
   }
 );
 
-// Indexes
 profileSchema.index({ userId: 1 });
 profileSchema.index({ firstName: 1, lastName: 1 });
 
