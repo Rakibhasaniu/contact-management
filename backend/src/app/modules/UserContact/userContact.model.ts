@@ -34,13 +34,10 @@ const userContactSchema = new Schema<IUserContact>(
   }
 );
 
-// Compound unique index: one user can't have duplicate contacts
 userContactSchema.index({ userId: 1, contactId: 1 }, { unique: true });
 
-// Index for searching by alias
 userContactSchema.index({ userId: 1, alias: 'text' });
 
-// Index for listing user's contacts
 userContactSchema.index({ userId: 1, createdAt: -1 });
 
 export const UserContact = model<IUserContact>('UserContact', userContactSchema);

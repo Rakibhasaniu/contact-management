@@ -142,7 +142,6 @@ const ProfileView = () => {
       {success && <Alert type="success" message="Profile updated successfully!" />}
       {authSuccess && <Alert type="success" message="Password changed successfully!" />}
 
-      {/* Profile Information Section */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <div className="flex items-center gap-2 mb-6">
           <UserCircleIcon className="h-6 w-6 text-blue-600" />
