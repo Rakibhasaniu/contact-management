@@ -101,14 +101,14 @@ const Register = () => {
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="First Name"
-              placeholder="John"
+              placeholder="Rakib"
               register={register('firstName')}
               error={errors.firstName?.message}
               required
             />
             <Input
               label="Last Name"
-              placeholder="Doe"
+              placeholder="Hasan"
               register={register('lastName')}
               error={errors.lastName?.message}
               required
@@ -118,7 +118,7 @@ const Register = () => {
           <Input
             label="Email"
             type="email"
-            placeholder="john@example.com"
+            placeholder="rakib@example.com"
             register={register('email')}
             error={errors.email?.message}
             required

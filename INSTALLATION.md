@@ -4,71 +4,13 @@ Contact Management System - Installation & Running Instructions
 
 Before starting, ensure you have the following installed:
 
-- **Node.js**: Version 16.x or higher
-  - Check: `node --version`
-  - Download: https://nodejs.org/
-
+- **Node.js**
 - **npm**: Version 8.x or higher (comes with Node.js)
-  - Check: `npm --version`
-
 - **Git**: For cloning the repository
-  - Check: `git --version`
-  - Download: https://git-scm.com/
 
-- **MongoDB Atlas Account**: Required (no local MongoDB)
-  - Create account: https://www.mongodb.com/products/platform/atlas-database
 
----
 
-## Part 1: MongoDB Atlas Setup (Cloud Database)
-
-### Step 1: Create MongoDB Atlas Account
-1. Go to https://www.mongodb.com/products/platform/atlas-database
-2. Click "Try Free"
-3. Sign up using email or Google account
-4. Verify your email address
-
-### Step 2: Create a Database Cluster
-1. After login, click **"Build a Database"**
-2. Choose **M0 (Free tier)**
-3. Select provider: **AWS**
-4. Select region: Choose closest to your location (e.g., `ap-south-1` for Asia)
-5. Cluster Name: `contact-management`
-6. Click **"Create"**
-7. Wait 3-5 minutes for cluster to be created
-
-### Step 3: Create Database User
-1. Click **"Database Access"** in left sidebar
-2. Click **"Add New Database User"**
-3. Select **"Password"** authentication method
-4. Username: `contactapp`
-5. Click **"Autogenerate Secure Password"**
-6. **IMPORTANT**: Copy and save this password
-7. Database User Privileges: Select **"Read and write to any database"**
-8. Click **"Add User"**
-
-### Step 4: Configure Network Access
-1. Click **"Network Access"** in left sidebar
-2. Click **"Add IP Address"**
-3. Click **"Allow Access from Anywhere"**
-4. IP Address will be: `0.0.0.0/0`
-5. Click **"Confirm"**
-
-### Step 5: Get Connection String
-1. Click **"Database"** in left sidebar
-2. Click **"Connect"** button on your cluster
-3. Select **"Connect your application"**
-4. Driver: **Node.js**
-5. Version: **4.1 or later**
-6. Copy the connection string (looks like):
-mongodb+srv://contactapp:<password>@contact-management.xxxxx.mongodb.net/?retryWrites=true&w=majority
-7. Replace `<password>` with the password you copied in Step 3
-8. Add database name before the `?`:
-mongodb+srv://contactapp:YOUR_PASSWORD@contact-management.xxxxx.mongodb.net/contact-management?retryWrites=true&w=majority
-
----
-
-## Part 2: Backend Setup & Installation
+## Part 1: Backend Setup & Installation
 
 ### Step 1: Clone Repository
 ```bash
@@ -77,21 +19,10 @@ cd contact-management-system
 Step 2: Navigate to Backend Directory
 bashcd backend-sol
 Step 3: Install Dependencies
-bashnpm install
+bash npm install
 This will install all required packages listed in package.json. Wait for completion (2-3 minutes).
-Step 4: Configure Environment Variables
-Open the .env file in backend-sol/ directory and update:
-envNODE_ENV=development
-PORT=8000
-DATABASE_URL=mongodb+srv://contactapp:YOUR_PASSWORD@contact-management.xxxxx.mongodb.net/contact-management?retryWrites=true&w=majority
-BCRYPT_SALT_ROUNDS=12
-JWT_ACCESS_SECRET=a8f5e2d1c3b7a9e4f8d2c1b5a7e9f3d8c2b1a5e7f9d3c8b2a1e5f7d9c3b8a2e1
-JWT_ACCESS_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=b9g6f3e2d4c8b0f5g9e3d2c6b8f0g4e9d3c7b1f6g0e4d8c3b2f7g1e5d9c4b3f2
-JWT_REFRESH_EXPIRES_IN=30d
-IMPORTANT: Replace the DATABASE_URL with your actual MongoDB Atlas connection string from Part 1, Step 5.
-Step 5: Start Backend Server (Development Mode)
-bashnpm run dev
+Step 4: Start Backend Server (Development Mode)
+bash npm run start:dev
 Expected Output:
 Database connected successfully
 Server is running on port 8000
@@ -100,22 +31,22 @@ Step 6: Verify Backend is Working
 Open another terminal and test:
 bashcurl http://localhost:8000
 Expected Response:
-Contact Management System Server is running!
+Contact Server is running!
 
-Part 3: Frontend Setup & Installation
+Part 2: Frontend Setup & Installation
 Step 1: Open New Terminal
 Keep the backend running in the first terminal. Open a new terminal window.
 Step 2: Navigate to Frontend Directory
-bashcd contact-management-system/frontend-sol
+bash cd contact-management-system/frontend-sol
 Step 3: Install Dependencies
-bashnpm install
+bash npm install
 This will install all required packages (3-4 minutes).
 Step 4: Configure Environment Variables
 The .env file in frontend-sol/ should already contain:
 envVITE_API_URL=http://localhost:8000/api/v1
 No changes needed if running locally. If deploying to production, update the URL.
 Step 5: Start Frontend Server (Development Mode)
-bashnpm run dev
+bash npm run dev
 Expected Output:
   VITE v5.x.x  ready in xxx ms
 
@@ -150,7 +81,7 @@ Click "Add Contact" button
 Fill in:
 
 Phone Number: 01534629987
-Name: John Doe
+Name: Rakib Hasan
 Labels: friend, work
 
 
@@ -162,7 +93,7 @@ Test 3: Search Contact
 Type in search bar: John
 Select "Name" from dropdown
 Click "Search"
-Should display John Doe contact
+Should display John Rakib contact
 
 Test 4: API Test (Using cURL or Postman)
 Register via API:
@@ -259,18 +190,7 @@ bashcd frontend-sol
 rm -rf node_modules package-lock.json
 npm install
 npm run dev
-
-Available Scripts
-Backend Scripts
-bashnpm run dev          # Start development server with auto-reload
-npm run build        # Compile TypeScript to JavaScript
-npm start            # Start production server
-npm run lint         # Run ESLint for code quality
-Frontend Scripts
-bashnpm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
+     # Run ESLint
 
 Project Structure
 contact-management-system/
@@ -345,5 +265,4 @@ Notes
 Backend must be running before starting frontend
 Both .env files are included in the repository (as per requirements)
 node_modules folders are NOT committed to Git
-Use Node.js 16+ for compatibility
 MongoDB Atlas is required (no local MongoDB)

@@ -26,15 +26,7 @@ User B sees: "Milar - 01534629987"
 
 ---
 
-## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [API Documentation](./API_DOCUMENTATION.md) | Complete API reference with endpoints and examples |
-| [Solution Breakdown](./SOLUTION_BREAKDOWN.md) | Technical architecture and design decisions |
-| [Installation Guide](./INSTALLATION.md) | Step-by-step setup and running instructions |
-
----
 
 ## Technology Stack
 
@@ -57,7 +49,9 @@ User B sees: "Milar - 01534629987"
 - **Forms**: React Hook Form
 - **Styling**: Tailwind CSS
 - **UI Components**: Custom components with shadcn/ui design
-- **Icons**: Lucide React
+- **Icons**: Hero icon
+- **Validation**: Yup
+
 
 ---
 
@@ -118,7 +112,7 @@ contact-management-system/
 ## Quick Start
 
 ### Prerequisites
-- Node.js 16+
+- Node.js 18+
 - npm 8+
 - MongoDB Atlas account (free tier)
 
@@ -154,7 +148,7 @@ javascript{
   lastName: String,
   otherEmails: [String],
   contacts: [{ phoneNumber, alias }]  // Initial import only
-}
+}]
 3. contacts
 Global phone number storage
 javascript{
@@ -272,70 +266,16 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 
 Database Indexes
 Optimized for query performance:
-CollectionIndexPurposeusers{ email: 1 }Login queriesprofiles{ userId: 1 }Profile lookupcontacts{ normalizedPhone: 1 }Deduplication (unique)usercontacts{ userId: 1, contactId: 1 }Prevent duplicates (unique)usercontacts{ userId: 1, alias: 1 }Name searchusercontacts{ userId: 1, createdAt: -1 }Sorted listing
-
-Deployment
-Backend Deployment Options
-
-Heroku
-Railway
-Render
-AWS EC2
-DigitalOcean
-
-Frontend Deployment Options
-
-Vercel
-Netlify
-AWS S3 + CloudFront
-GitHub Pages
-
-Production Checklist
-
- Update MongoDB Atlas IP whitelist
- Set NODE_ENV=production
- Use strong JWT secrets
- Enable CORS for frontend domain
- Configure HTTPS
- Set up monitoring and logging
+CollectionIndex Purposeusers{ email: 1 }Login queriesprofiles{ userId: 1 }Profile lookupcontacts{ normalizedPhone: 1 }Deduplication (unique)usercontacts{ userId: 1, contactId: 1 }Prevent duplicates (unique)usercontacts{ userId: 1, alias: 1 }Name searchusercontacts{ userId: 1, createdAt: -1 }Sorted listing
 
 
-Troubleshooting
-Common Issues
-Backend won't start
+I've added you as a collaborator to my GitHub repository: contact-management-system
 
-Check MongoDB Atlas connection string
-Verify IP whitelist includes your IP or 0.0.0.0/0
-Ensure port 8000 is not in use
+ Please check your email (including spam folder) for a GitHub invitation from "Rakibhasaniu"
 
-Frontend can't connect to backend
+ The invitation email subject will be something like:
+"You've been invited to collaborate on Rakibhasaniu/contact-management"
 
-Verify backend is running
-Check VITE_API_URL in frontend .env
-Check CORS configuration
+ Repository URL: https://github.com/Rakibhasaniu/contact-management
 
-Authentication fails
-
-Verify JWT secrets match in .env
-Check token expiry settings
-Clear localStorage and try again
-
-For detailed troubleshooting, see INSTALLATION.md
-
-Contributing
-This is a submission project. For questions or issues:
-
-Review documentation files
-Contact: trptuser001@gmail.com
-
-
-License
-This project is for educational/evaluation purposes.
-
-Acknowledgments
-
-MongoDB Atlas for cloud database hosting
-Express.js for backend framework
-React team for frontend library
-Redux Toolkit for state management
-Tailwind CSS for styling utilities
+ Please accept the invitation so you can access the code!

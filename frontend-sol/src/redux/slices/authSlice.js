@@ -69,7 +69,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -79,12 +78,19 @@ const authSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
+
+        if (action.payload.data && action.payload.data.accessToken) {
+          state.user = action.payload.data.user;
+          state.isAuthenticated = true;
+
+          localStorage.setItem('accessToken', action.payload.data.accessToken);
+          localStorage.setItem('user', JSON.stringify(action.payload.data.user));
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Registration failed';
       })
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -99,7 +105,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Login failed';
       })
-      // Change Password
       .addCase(changePassword.pending, (state) => {
         state.loading = true;
         state.error = null;
