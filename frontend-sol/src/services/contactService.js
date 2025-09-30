@@ -4,7 +4,13 @@ export const contactService = {
   // Get all contacts
   getAllContacts: async (params = {}) => {
     const response = await api.get('/contacts', { params });
-    return response.data;
+    console.log('🚀 ~ Get all contact:', response.data);
+    
+    // Return the response but ensure data is the contacts array
+    return {
+      ...response.data,
+      data: response.data.data?.contacts || [] // ← Extract contacts array
+    };
   },
 
   // Search contacts
@@ -12,22 +18,26 @@ export const contactService = {
     const response = await api.get('/contacts', {
       params: { searchBy, search: searchTerm },
     });
-    return response.data;
+    console.log('🚀 ~ Search response:', response.data);
+    
+    // Return the response but ensure data is the contacts array
+    return {
+      ...response.data,
+      data: response.data.data?.contacts || [] // ← Extract contacts array
+    };
   },
 
-  // Add new contact
+  // Rest of the methods remain the same...
   addContact: async (contactData) => {
     const response = await api.post('/contacts', contactData);
     return response.data;
   },
 
-  // Update contact
   updateContact: async (contactId, contactData) => {
     const response = await api.patch(`/contacts/${contactId}`, contactData);
     return response.data;
   },
 
-  // Delete contact
   deleteContact: async (contactId) => {
     const response = await api.delete(`/contacts/${contactId}`);
     return response.data;
